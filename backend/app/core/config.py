@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     API_V1_PREFIX: str = "/api/v1"
 
-    DATABASE_URL: str = "sqlite:///./weather.db"
+    DATABASE_URL: str 
     ALLOWED_ORIGINS: list[str] = Field(default_factory=list)
 
     OPENWEATHER_API_KEY: str = ""
