@@ -52,6 +52,15 @@ class WeatherSearchService:
             )
 
         return await self.repo.update(obj, payload)
+    
+    async def upsert(self, payload: WeatherSearchCreate):
+        if not payload.location.strip():
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="location cannot be empty",
+            )
+        self._validate_date_range(payload.start_date, payload.end_date)
+        return await self.repo.upsert(payload)
 
     async def delete(self, search_id: int) -> None:
         obj = await self.get_by_id(search_id)

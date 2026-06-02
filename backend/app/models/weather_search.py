@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from enum import Enum
 
-from sqlalchemy import Date, DateTime, Enum as SqlEnum, Float, Index, JSON, String, Text, func
+from sqlalchemy import Date, DateTime, Enum as SqlEnum, Float, Index, JSON, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -18,6 +18,7 @@ class WeatherSearch(Base):
     __table_args__ = (
         Index("ix_weather_searches_location", "location"),
         Index("ix_weather_searches_created_at", "created_at"),
+        UniqueConstraint("location", "units", "start_date", "end_date", name="uq_weather_search_identity")
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)

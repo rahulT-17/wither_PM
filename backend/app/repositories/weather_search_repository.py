@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.weather_search import WeatherSearch
@@ -39,6 +39,28 @@ class WeatherSearchRepository:
         await self.db.commit()
         await self.db.refresh(obj)
         return obj
+    
+    async def upsert(self, payload: WeatherSearchCreate) -> WeatherSearch:
+        values = payload.model_dump()
+        stmt = (
+            insert(WeatherSearch)
+            .values(**values)
+            .on_conflict_do_update(
+                constraint="uq_weather_search_identity",
+                set_={
+                    "resolved_city": values.get("resolved_city"),
+                    "country_code": values.get("country_code"),
+                    "latitude": values.get("latitude"),
+                    "longitude": values.get("longitude"),
+                    "notes": values.get("notes"),
+                    "weather_data": values.get("weather_data"),
+                },
+            )
+            .returning(WeatherSearch)
+        )
+        result = await self.db.execute(stmt)
+        await self.db.commit()
+        return result.scalar_one()
 
     async def delete(self, obj: WeatherSearch) -> None:
         await self.db.delete(obj)
