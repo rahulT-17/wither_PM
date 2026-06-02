@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: list[str] = Field(default_factory=list)
 
     OPENWEATHER_API_KEY: str = ""
+    OPENWEATHER_BASE_URL: str = "https://api.openweathermap.org"
+    OPENWEATHER_TIMEOUT_SECONDS: float = 10.0
+    
     GROQ_API_KEY: str = ""
 
     @field_validator("ALLOWED_ORIGINS", mode="before")
