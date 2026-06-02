@@ -1,4 +1,6 @@
 from datetime import date, datetime
+from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 
 from pydantic import BaseModel, Field
 
