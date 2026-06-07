@@ -1,14 +1,13 @@
 from datetime import date, datetime
-from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.weather_search import Units
 
 
 class WeatherSearchBase(BaseModel):
     location: str = Field(min_length=1, max_length=255)
+    search_key: str | None = Field(default=None, min_length=64, max_length=64)
     resolved_city: str | None = Field(default=None, max_length=255)
     country_code: str | None = Field(default=None, max_length=8)
     latitude: float | None = None
@@ -42,4 +41,4 @@ class WeatherSearchRead(WeatherSearchBase):
     created_at: datetime
     updated_at: datetime
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)

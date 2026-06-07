@@ -1,4 +1,5 @@
-from sqlalchemy import select, insert
+from sqlalchemy import func, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.weather_search import WeatherSearch
@@ -39,25 +40,28 @@ class WeatherSearchRepository:
         await self.db.commit()
         await self.db.refresh(obj)
         return obj
-    
+
     async def upsert(self, payload: WeatherSearchCreate) -> WeatherSearch:
         values = payload.model_dump()
-        stmt = (
-            insert(WeatherSearch)
-            .values(**values)
-            .on_conflict_do_update(
-                constraint="uq_weather_search_identity",
-                set_={
-                    "resolved_city": values.get("resolved_city"),
-                    "country_code": values.get("country_code"),
-                    "latitude": values.get("latitude"),
-                    "longitude": values.get("longitude"),
-                    "notes": values.get("notes"),
-                    "weather_data": values.get("weather_data"),
-                },
-            )
-            .returning(WeatherSearch)
-        )
+        stmt = insert(WeatherSearch).values(**values)
+
+        stmt = stmt.on_conflict_do_update(
+            index_elements=[WeatherSearch.search_key],
+            set_={
+                "location": stmt.excluded.location,
+                "resolved_city": stmt.excluded.resolved_city,
+                "country_code": stmt.excluded.country_code,
+                "latitude": stmt.excluded.latitude,
+                "longitude": stmt.excluded.longitude,
+                "start_date": stmt.excluded.start_date,
+                "end_date": stmt.excluded.end_date,
+                "units": stmt.excluded.units,
+                "notes": stmt.excluded.notes,
+                "weather_data": stmt.excluded.weather_data,
+                "updated_at": func.now(),
+            },
+        ).returning(WeatherSearch)
+
         result = await self.db.execute(stmt)
         await self.db.commit()
         return result.scalar_one()

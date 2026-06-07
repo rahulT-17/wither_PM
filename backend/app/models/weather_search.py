@@ -18,10 +18,11 @@ class WeatherSearch(Base):
     __table_args__ = (
         Index("ix_weather_searches_location", "location"),
         Index("ix_weather_searches_created_at", "created_at"),
-        UniqueConstraint("location", "units", "start_date", "end_date", name="uq_weather_search_identity")
+        UniqueConstraint("search_key", name="uq_weather_searches_search_key"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    search_key: Mapped[str] = mapped_column(String(64), nullable=False)
     location: Mapped[str] = mapped_column(String(255), nullable=False)
     resolved_city: Mapped[str | None] = mapped_column(String(255))
     country_code: Mapped[str | None] = mapped_column(String(8))
