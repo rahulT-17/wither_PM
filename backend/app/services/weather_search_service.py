@@ -1,3 +1,5 @@
+from hashlib import sha256
+
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,7 +19,31 @@ class WeatherSearchService:
                 detail="start_date cannot be after end_date",
             )
 
+    @staticmethod
+    def _normalize(value: str | None) -> str:
+        return " ".join((value or "").strip().lower().split())
+
+    @classmethod
+    def build_search_key(cls, payload: WeatherSearchCreate) -> str:
+        parts = [
+            cls._normalize(payload.location),
+            cls._normalize(payload.resolved_city),
+            (payload.country_code or "").strip().upper(),
+            payload.units.value if hasattr(payload.units, "value") else str(payload.units),
+            payload.start_date.isoformat() if payload.start_date else "",
+            payload.end_date.isoformat() if payload.end_date else "",
+        ]
+        digest = sha256("|".join(parts).encode("utf-8")).hexdigest()
+        return digest
+
+    @classmethod
+    def with_search_key(cls, payload: WeatherSearchCreate) -> WeatherSearchCreate:
+        data = payload.model_dump()
+        data["search_key"] = cls.build_search_key(payload)
+        return WeatherSearchCreate(**data)
+
     async def create(self, payload: WeatherSearchCreate):
+        payload = self.with_search_key(payload)
         if not payload.location.strip():
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -52,8 +78,9 @@ class WeatherSearchService:
             )
 
         return await self.repo.update(obj, payload)
-    
+
     async def upsert(self, payload: WeatherSearchCreate):
+        payload = self.with_search_key(payload)
         if not payload.location.strip():
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
