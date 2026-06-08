@@ -1,3 +1,4 @@
+# backend/app/core/config.py
 from functools import lru_cache
 from typing import Literal
 
@@ -18,22 +19,30 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     API_V1_PREFIX: str = "/api/v1"
 
-    DATABASE_URL: str 
+    DATABASE_URL: str
     ALLOWED_ORIGINS: list[str] = Field(default_factory=list)
 
     OPENWEATHER_API_KEY: str = ""
     OPENWEATHER_BASE_URL: str = "https://api.openweathermap.org"
     OPENWEATHER_TIMEOUT_SECONDS: float = 10.0
-    
+
     GROQ_API_KEY: str = ""
+    GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
+    GROQ_INSIGHT_MODEL: str = "openai/gpt-oss-120b"
+    GROQ_TIMEOUT_SECONDS: float = 20.0
+    GROQ_MAX_COMPLETION_TOKENS: int = 512
 
     @field_validator("ALLOWED_ORIGINS", mode="before")
     @classmethod
     def parse_origins(cls, value: object) -> list[str]:
         if isinstance(value, list):
-            return value
+            return [str(item).strip().strip('"').strip("'") for item in value if str(item).strip()]
         if isinstance(value, str):
-            return [item.strip() for item in value.split(",") if item.strip()]
+            return [
+                item.strip().strip('"').strip("'")
+                for item in value.split(",")
+                if item.strip().strip('"').strip("'")
+            ]
         return []
 
 
