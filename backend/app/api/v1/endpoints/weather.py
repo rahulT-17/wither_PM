@@ -49,6 +49,20 @@ async def search(
         units=parsed.units or units,
     )
 
+    persisted_snapshot = {
+        "query": q,
+        "units": parsed.units or units,
+        "resolved_city": result["location"].name,
+        "country_code": result["location"].country,
+        "lat": result["location"].lat,
+        "lon": result["location"].lon,
+        "start_date": parsed.start_date.isoformat() if parsed.start_date else None,
+        "end_date": parsed.end_date.isoformat() if parsed.end_date else None,
+        "summary": summary,
+        "current": result["current"].model_dump(mode="json"),
+        "forecast": result["forecast"].model_dump(mode="json"),
+    }
+
     saved = await WeatherSearchService(db).upsert(
         WeatherSearchCreate(
             location=q,
@@ -59,7 +73,7 @@ async def search(
             start_date=parsed.start_date,
             end_date=parsed.end_date,
             units=parsed.units or units,
-            weather_data=summary,
+            weather_data=persisted_snapshot,
         )
     )
 
