@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+backend/.venv/
+
+# Environment files / secrets
+.env
+.env.*
+.env.local
+.env.*.local
+*.key
+*.pem
+*.crt
+credentials
+.git-credentials
+
+# Databases
+*.sqlite3
+*.db
+instance/
+
+# IDE / editor
+.vscode/
+.idea/
+*.sublime-*
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python tooling / caches
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.pytype/
+.cache/
+
+# Build / packaging
+dist/
+build/
+*.egg-info/
+pip-wheel-metadata/
+
+# Docker / containers
+docker-compose.override.yml
+.envrc
+
+# Logs
+*.log
+
+# Misc
+node_modules/
+npm-debug.log
+yarn-error.log
